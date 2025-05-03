@@ -1,0 +1,39 @@
+version: '3.5'
+
+volumes:
+  report-db-data: {}
+  rabbitmq-lib:
+    driver: local
+  rabbitmq-log:
+    driver: local
+
+services:
+  db:
+    image: postgres:17beta2-alpine3.19
+    container_name: dng_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=report-db
+    ports:
+      - "8432:5432"
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+  redis:
+    image: redis:7.2.4
+    container_name: dng_redis
+    ports:
+      - "6379:6379"
+  rabbitmq:
+    image: rabbitmq:4.1.0-management
+    container_name: dng_rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: rabbit
+    volumes:
+      - rabbitmq-lib:/var/lib/rabbitmq/
+      - rabbitmq-log:/var/log/rabbitmq
